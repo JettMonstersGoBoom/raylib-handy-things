@@ -8,3 +8,8 @@ Single header to unpack PCX image data into a greyscale image, and load the pale
 unsigned char palettes[768];
   Image PCX_image = LoadImagePCX("draw.pcx",&palettes[0]);
 ```
+
+# raygui_menubar.h 
+A RayGUI component to add a menubar to the top of the screen. 
+
+![](https://github.com/JettMonstersGoBoom/raylib-handy-things/blob/main/RayMenuBar/menu.gif)
