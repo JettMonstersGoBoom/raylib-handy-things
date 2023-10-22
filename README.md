@@ -2,7 +2,8 @@
 Raylib handy things
 
 # ray_pcx.h 
-Single header to unpack PCX image data into a greyscale image, and load the palette into the supplied buffer 
+Single header to unpack PCX image data into a greyscale image, and load the palette into the supplied buffer.
+Intended for using a palettized shader with 8-bit data.
 
 ```
 unsigned char palettes[768];
