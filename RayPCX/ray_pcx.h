@@ -34,6 +34,11 @@ unsigned char *ptr;
 Image image = {0};
     //  load the raw data and process the header 
     raw_buffer = LoadFileData(fileName,&raw_length);
+    if (raw_buffer==NULL)
+    {
+        TraceLog(LOG_FATAL,TextFormat("File %s failed to load\n",fileName));
+        return image;
+    }
     header = (pcx_header*)&raw_buffer[0];
     ptr = raw_buffer+128;
     //  width and height + 1 ( 0 means 1 pixel in the header )
@@ -74,7 +79,7 @@ Image image = {0};
             }
         }
         //  skip cruft 
-        if( x < header->bytes_per_line)
+        while( x++ < header->bytes_per_line)
 			data = *ptr++; 
     }
     data = *ptr++;
