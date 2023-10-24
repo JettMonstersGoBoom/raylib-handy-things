@@ -14,6 +14,8 @@ In the sample provided I make 7 variants of the input palette and cycle them.
 
 ![](https://github.com/JettMonstersGoBoom/raylib-handy-things/blob/main/RayPCX/pcx_test.gif)
 
+NOTE: the FPS variations is caused by recording, not in app.
+
 The example image is (C) Mark J. Ferrari. used here as reference.
 
 # raygui_menubar.h 
