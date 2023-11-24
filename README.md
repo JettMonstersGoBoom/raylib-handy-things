@@ -24,5 +24,7 @@ A RayGUI component to add a menubar to the top of the screen.
 ![](https://github.com/JettMonstersGoBoom/raylib-handy-things/blob/main/RayMenuBar/menu.gif)
 
 # hot_reload 
-hot reloading multiple DLL/SO files each DLL can draw what it wants to the camera. and can ( in theory ) be updated on the fly
+hot reloading multiple DLL/SO files each DLL can draw what it wants to the camera. and can ( in theory ) be updated on the fly.
+only tested on windows , but should work for others. 
+
 
