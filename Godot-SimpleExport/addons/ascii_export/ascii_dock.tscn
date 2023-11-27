@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=3 uid="uid://n44d53us24uu"]
+
+[ext_resource type="Script" path="res://addons/ascii_export/ascii3D_creator.gd" id="1_o3fly"]
+
+[node name="Ascii3D Export" type="Panel"]
+offset_right = 220.0
+offset_bottom = 340.0
+script = ExtResource("1_o3fly")
+
+[node name="SaveButton" type="Button" parent="."]
+offset_left = 10.0
+offset_right = 210.0
+offset_bottom = 31.0
+text = "Save Ascii3D
+"
+
+[node name="SaveAscii3DDialog" type="FileDialog" parent="."]
+filters = PackedStringArray("*.ascii3d")
