@@ -32,3 +32,6 @@ hot reloading multiple DLL/SO files each DLL can draw what it wants to the camer
 only tested on windows , but should work for others. 
 
 
+# Godot-Simple_Export 
+an addon for Godot to export a simple ascii scene representation. DO NOT USE AS IS. it's for learning from. 
+
