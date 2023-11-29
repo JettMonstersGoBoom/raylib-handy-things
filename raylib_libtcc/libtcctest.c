@@ -10,12 +10,14 @@
 
 bool TCC_error = false;
 
+//	called when there's a compile error
 static void TCC_compile_err(void *d, const char *s)
 {
     TCC_error = true;
 	printf("error n%ld (%s)", (long)d, s);
 }
 
+//	prepare, called once
 TCCState *TCC_Prep()
 {
     TCCState *state;
@@ -32,6 +34,7 @@ TCCState *TCC_Prep()
     return state;
 }
 
+//	add a .C file for compilation 
 bool TCC_AddFile(TCCState *state,const char *filename)
 {
     if (state==NULL) return;
@@ -44,8 +47,11 @@ bool TCC_AddFile(TCCState *state,const char *filename)
     return true;
 }
 
+//	an empty function 
+//	if function not found use this instead of NULL
 void TCC_FuncFailed(void *idk){}
 
+//	find a function by name
 void *TCC_GetFunc(TCCState *state,char *funcname)
 {
     if (state!=NULL)
@@ -60,6 +66,7 @@ void *TCC_GetFunc(TCCState *state,char *funcname)
     return TCC_FuncFailed;
 }
 
+//	shut down everything
 void TCC_Unload(TCCState *state)
 {
 bool (*func)(void);
