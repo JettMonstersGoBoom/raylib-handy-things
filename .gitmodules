@@ -1,3 +1,6 @@
 [submodule "raylib_libtcc/raylib"]
 	path = raylib_libtcc/raylib
 	url = https://github.com/raysan5/raylib.git
+[submodule "zipfiles/zip"]
+	path = zipfiles/zip
+	url = https://github.com/kuba--/zip.git
