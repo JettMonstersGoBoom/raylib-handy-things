@@ -1,5 +1,7 @@
-
-
+//
+// using the zip/src library from here https://github.com/kuba--/zip
+// the other systems i found had a LOT of external dependancies, this is 1 .C file and 2 headers
+//
 
 #include <stdio.h>
 #include <stdlib.h>
