@@ -1,5 +1,7 @@
-
-
+//
+// using the zip/src library from here https://github.com/kuba--/zip
+// the other systems i found had a LOT of external dependancies, this is 1 .C file and 2 headers
+//
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,7 +10,7 @@
 #include <rlgl.h>
 #include <raymath.h>
 #include "zip.h"
-
+//    container with the zip pointers and a count 
 typedef struct _archive_t_
 {
     int count;
@@ -16,7 +18,7 @@ typedef struct _archive_t_
 } _archive_t_; 
 
 _archive_t_ archives;
-
+//    mount all zips/pk3's in the path ( use extension ) 
 void zipsMount(const char *path,const char *ext)
 {
     FilePathList list = LoadDirectoryFilesEx(path,ext,false);
@@ -28,7 +30,8 @@ void zipsMount(const char *path,const char *ext)
     for (int q=0;q<list.count;q++)
         archives.zips[q] = zip_open(list.paths[q], 0, 'r');
 }
-
+//    checks for file availability in any archives
+//    returns -1 if not found
 int _zipFindFile(const char *fname)
 {
     for (int q=0;q<archives.count;q++)
@@ -44,7 +47,8 @@ int _zipFindFile(const char *fname)
     return -1;
 }
 
-
+//    load data returning a buffer ( or NULL ) and filling size 
+//
 void *zipLoadFileData(const char *fname,int *size)
 {
     for (int q=0;q<archives.count;q++)
@@ -64,7 +68,7 @@ void *zipLoadFileData(const char *fname,int *size)
     TraceLog("ZIP: file not found in archives %s",fname);
     return NULL;
 }
-
+//    obvious 
 Image zipLoadImage(const char *fname)
 {
     int buffsize;
@@ -84,12 +88,13 @@ Image zipLoadImage(const char *fname)
     }
     return im;
 }
-
+//    obviouser
 Texture2D zipLoadTexture(const char *fname)
 {
     return LoadTextureFromImage(zipLoadImage(fname));
 }
 
+//    simple test 
 #if 1
 void main(int argc,char **argv)
 {
@@ -100,12 +105,16 @@ void main(int argc,char **argv)
     camera.fovy = 45.0f;                                
     camera.projection = CAMERA_PERSPECTIVE;             
 
+    //    EDIT THIS
     //  change this to where your archives are stored 
+    //    EDIT THIS
     zipsMount("quake path",".pk3");
 
     InitWindow(1280, 720, "ted");
 
+    //    EDIT THIS
     Texture2D test = zipLoadTexture("textures/sfx/sewerwater_base.dds");
+    //    EDIT THIS
 
     while (!WindowShouldClose())
     {
