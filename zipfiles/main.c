@@ -115,5 +115,6 @@ void main(int argc,char **argv)
         DrawFPS(10,10);
         EndDrawing();
     }
+    ZFS_UnMountArchives();
 }
 #endif
