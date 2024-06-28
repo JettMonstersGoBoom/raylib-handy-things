@@ -10,88 +10,68 @@
 #include <rlgl.h>
 #include <raymath.h>
 #include "zip.h"
-//    container with the zip pointers and a count 
-typedef struct _archive_t_
-{
-    int count;
-    struct zip_t **zips;
-} _archive_t_; 
 
-_archive_t_ archives;
-//    mount all zips/pk3's in the path ( use extension ) 
-void zipsMount(const char *path,const char *ext)
+typedef struct ZFS_zip
 {
-    FilePathList list = LoadDirectoryFilesEx(path,ext,false);
-    if (list.count==0)
-        return;
+    struct zip_t *zip;
+    struct ZFS_zip *next;
+} ZFS_zip;
 
-    archives.count = list.count;
-    archives.zips = (struct zip_t*)RL_CALLOC(list.count,sizeof(void*));
-    for (int q=0;q<list.count;q++)
-        archives.zips[q] = zip_open(list.paths[q], 0, 'r');
-}
-//    checks for file availability in any archives
-//    returns -1 if not found
-int _zipFindFile(const char *fname)
+ZFS_zip *archives=NULL;
+unsigned char* ZFS_LoadFileData(const char* path, int* len)
 {
-    for (int q=0;q<archives.count;q++)
+    ZFS_zip* archive = archives;
+    char* rp = path;
+
+    if ((path[0] == '.') && (path[1]=='/'))
+        rp = path + 3;
+
+    while (archive != NULL)
     {
-        int ret = zip_entry_open(archives.zips[q],fname);
-        if (ret==0)
+        int zf = zip_entry_open(archive->zip, rp);
+        if (zf == 0)
         {
-            printf("found %d for %s\n",q,fname);
-            return q;
+            void* buffer = NULL;
+            int length;
+            zip_entry_read(archive->zip, &buffer, &length);
+            *len = length;
+            TraceLog(LOG_INFO, "ZFS:Loaded %s %x %d", path, buffer, length);
+            return buffer;
         }
+        archive = archive->next;
     }
-    printf("file %s not found\n",fname);
-    return -1;
-}
-
-//    load data returning a buffer ( or NULL ) and filling size 
-//
-void *zipLoadFileData(const char *fname,int *size)
-{
-    for (int q=0;q<archives.count;q++)
-    {
-        int ret = zip_entry_open(archives.zips[q],fname);
-        if (ret==0)
-        {
-            size_t bufsize;
-            char *buf = NULL;
-            size_t buftmp;
-            bufsize = zip_entry_read(archives.zips[q], (void **)&buf, &buftmp);
-            if (size!=NULL)
-                *size = bufsize;
-            return buf;
-        }
-    }
-    TraceLog("ZIP: file not found in archives %s",fname);
+    TraceLog(LOG_ERROR, "ZFS:%s not found\n", path);
     return NULL;
 }
-//    obvious 
-Image zipLoadImage(const char *fname)
+
+void ZFS_UnMountArchives()
 {
-    int buffsize;
-    void *buffer = zipLoadFileData(fname,&buffsize);
-    Image im = {0};
-    if (buffer!=NULL)
+    ZFS_zip* archive = archives;
+
+    while (archive != NULL)
     {
-        int nFrames = 0;
-        TraceLog(LOG_INFO,"ZIP: %s from archive",fname);
-        im = LoadImageAnimFromMemory(GetFileExtension(fname),buffer,buffsize,&nFrames);
-        printf("LoadImage %s %d %d\n",fname,im.width,im.height);
-        free(buffer);
+        free(archive->zip);
+        archive = archive->next;
     }
-    else 
-    {
-        TraceLog(LOG_ERROR,"ZIP: LoadImage %s not found in archives",fname);
-    }
-    return im;
 }
-//    obviouser
-Texture2D zipLoadTexture(const char *fname)
+
+void ZFS_MountArchives(const char *path,const char *ext)
 {
-    return LoadTextureFromImage(zipLoadImage(fname));
+    int errnum = 0;
+    FilePathList flist = LoadDirectoryFilesEx(path,ext,true);
+    for (unsigned int q=0;q<flist.count;q++)
+    {
+        struct zip_t *z= zip_openwitherror(flist.paths[q], 0,'r',&errnum);
+        if (errnum==0)
+        {
+            ZFS_zip *archive = (ZFS_zip*)RL_CALLOC(1,sizeof(ZFS_zip));
+            archive->zip = z;
+            archive->next = archives;
+            TraceLog(LOG_INFO,"ZFS:Mounted %s",flist.paths[q]);
+            archives = archive;
+        }
+    }
+    SetLoadFileDataCallback(ZFS_LoadFileData);
 }
 
 //    simple test 
@@ -108,13 +88,12 @@ void main(int argc,char **argv)
     //    EDIT THIS
     //  change this to where your archives are stored 
     //    EDIT THIS
-    zipsMount("quake path",".pk3");
+    ZFS_MountArchives("archives path",".zip");
 
     InitWindow(1280, 720, "ted");
 
-    //    EDIT THIS
-    Texture2D test = zipLoadTexture("textures/sfx/sewerwater_base.dds");
-    //    EDIT THIS
+    //  LoadModel, LoadTexture, LoadImage will now all load from the archives 
+    //  assuming the zip contains the file
 
     while (!WindowShouldClose())
     {
@@ -132,7 +111,7 @@ void main(int argc,char **argv)
         BeginMode3D(camera);        
         DrawGrid(20,20);
         EndMode3D();
-        DrawTexture(test,0,0,WHITE);
+//        DrawTexture(test,0,0,WHITE);
         DrawFPS(10,10);
         EndDrawing();
     }
