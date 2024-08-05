@@ -78,9 +78,10 @@ _input_action_t_ input_actions[]=
     //  pressed A
     { KEY_A | KEY_PRESSED , Action_A_pressed},
     //  B handler
+    //  NOTE the order is important. we want PRESSED before just held
     { KEY_B | KEY_PRESSED , Action_B_pressed},
-    { KEY_B | KEY_RELEASED , Action_B_released},
     { KEY_B , Action_B },
+    { KEY_B | KEY_RELEASED , Action_B_released},
     //  check gamepad 0 
     //  OR gamepad ANY 
     { GAMEPAD0      | GAMEPAD_BUTTON_LEFT_FACE_UP | GAMEPAD_PRESSED         , Action_A_pressed},
