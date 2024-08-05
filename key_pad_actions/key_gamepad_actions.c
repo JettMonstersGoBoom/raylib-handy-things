@@ -9,6 +9,8 @@ typedef struct
     bool (*action)(void *idk);
 } _input_action_t_;
 
+//  example actions we take
+
 bool Action_A(void *idk)
 {
     printf("action A\n");
@@ -45,28 +47,30 @@ bool Action_C(void *idk)
     return true;
 }
 
+//  bitmasks for gamepad ID. 
 #define GAMEPAD0            0b00100000000000000000000000000000
 #define GAMEPAD1            0b01000000000000000000000000000000
 #define GAMEPAD2            0b01100000000000000000000000000000
 #define GAMEPAD3            0b10000000000000000000000000000000
 #define GAMEPAD_ANY         0b11100000000000000000000000000000  //  any of the 4 gamepads 
 
+//  bitmasks for gamepad states  
 #define GAMEPAD_PRESSED     0b00010000000000000000000000000000
 #define GAMEPAD_RELEASED    0b00001000000000000000000000000000
-
+//  bitmasks for keyboard states
 #define KEY_PRESSED         0b00010000000000000000000000000000
 #define KEY_RELEASED        0b00001000000000000000000000000000
 #define KEY_SHIFT           0b00000100000000000000000000000000
 #define KEY_CONTROL         0b00000010000000000000000000000000
 #define KEY_ALT             0b00000001000000000000000000000000
 
-
 //  define some example actions
+//  just a NULL terminated list of actions
 _input_action_t_ input_actions[]=
 {
     //  hold CTRL + SHIFT + ALT + C for "Action_C"
+    //  we OR the bitmasks together to define functionality 
     { KEY_C | KEY_CONTROL | KEY_SHIFT | KEY_ALT | KEY_PRESSED , Action_C},
-
     //  hold A
     { KEY_A , Action_A },
     //  pressed A
@@ -75,11 +79,12 @@ _input_action_t_ input_actions[]=
     { KEY_B | KEY_PRESSED , Action_B_pressed},
     { KEY_B | KEY_RELEASED , Action_B_released},
     { KEY_B , Action_B },
-
+    //  check gamepad 0 
+    //  OR gamepad ANY 
     { GAMEPAD0      | GAMEPAD_BUTTON_LEFT_FACE_UP | GAMEPAD_PRESSED         , Action_A_pressed},
     { GAMEPAD0      | GAMEPAD_BUTTON_LEFT_FACE_DOWN                         , Action_B},
     { GAMEPAD_ANY   | GAMEPAD_BUTTON_RIGHT_FACE_LEFT | GAMEPAD_RELEASED     , Action_B_released},
-
+    //  null entry ( this is important to terminate the list )
     { 0 , NULL}
 };
 //  we pass a pointer to inputs, so we could change them for different parts of the game. 
@@ -91,17 +96,22 @@ void CheckKeys(_input_action_t_ *inputs)
     {
         //  assume we're not taking an action 
         bool takeAction = false;
+        //  
+        //  check if it's a gamepad request
+        //  
         if ((action->key&GAMEPAD_ANY)!=0)
         {
             int gid = (action->key>>29);
+            //  gid is the gamepad mask shifted down to get the top 3 bits
             for (int q=0;q<4;q++)
             {
                 //  check for bits to see if we want this pad 
                 if ((gid&(1<<q))!=0)
                 {
+                    //  check the pad is available
                     if (IsGamepadAvailable(q))
                     {
-                        if ((action->key&GAMEPAD_PRESSED)!=0)                  //  check if we've asked for HELD state
+                        if ((action->key&GAMEPAD_PRESSED)!=0)                  //  check if we've asked for PRESSED state
                         {
                             if (IsGamepadButtonPressed(q,action->key & 0xffff))
                             {
@@ -109,7 +119,7 @@ void CheckKeys(_input_action_t_ *inputs)
                                 takeAction = true;
                             }
                         }
-                        else if ((action->key&GAMEPAD_RELEASED)!=0)                  //  check if we've asked for RELEASE state
+                        else if ((action->key&GAMEPAD_RELEASED)!=0)                  //  check if we've asked for RELEASED state
                         {
                             if (IsGamepadButtonReleased(q,action->key & 0xffff))
                             {
@@ -119,7 +129,7 @@ void CheckKeys(_input_action_t_ *inputs)
                         }
                         else 
                         {
-                            if (IsGamepadButtonDown(q,action->key & 0xffff))
+                            if (IsGamepadButtonDown(q,action->key & 0xffff))        //  check for HELD
                             {
                                 printf("GID %d,%x DOWN?\n",gid,action->key&0xffff);
                                 takeAction = true;
@@ -134,7 +144,7 @@ void CheckKeys(_input_action_t_ *inputs)
         {
             //  keyboard
 
-            if ((action->key&KEY_PRESSED)!=0)                  //  check if we've asked for HELD state
+            if ((action->key&KEY_PRESSED)!=0)                  //  check if we've asked for PRESSED state
             {
                 if (IsKeyPressed(action->key&0x7ff))
                 {
@@ -148,7 +158,7 @@ void CheckKeys(_input_action_t_ *inputs)
                     takeAction = true;
                 }
             }
-            else                                            //  we just want the key 
+            else                                            //  we just want the key HELD 
             {
                 if (IsKeyDown(action->key&0x7ff))
                 {
