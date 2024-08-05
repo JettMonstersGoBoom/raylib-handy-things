@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "raylib.h"
 
@@ -52,11 +53,12 @@ bool Action_C(void *idk)
 #define GAMEPAD1            0b01000000000000000000000000000000
 #define GAMEPAD2            0b01100000000000000000000000000000
 #define GAMEPAD3            0b10000000000000000000000000000000
-#define GAMEPAD_ANY         0b11100000000000000000000000000000  //  any of the 4 gamepads 
-
+//  any of the 4 gamepads 
+#define GAMEPAD_ANY         0b11100000000000000000000000000000  
 //  bitmasks for gamepad states  
 #define GAMEPAD_PRESSED     0b00010000000000000000000000000000
 #define GAMEPAD_RELEASED    0b00001000000000000000000000000000
+
 //  bitmasks for keyboard states
 #define KEY_PRESSED         0b00010000000000000000000000000000
 #define KEY_RELEASED        0b00001000000000000000000000000000
