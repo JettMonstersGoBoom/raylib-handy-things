@@ -189,7 +189,7 @@ int main(int argc,char **argv)
 {
     const int screenWidth = 800;
     const int screenHeight = 600;
-    InitWindow(screenWidth, screenHeight, "TreeView");
+    InitWindow(screenWidth, screenHeight, "inputs");
     SetWindowState(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(60);
 
