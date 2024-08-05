@@ -115,7 +115,6 @@ void CheckKeys(_input_action_t_ *inputs)
                         {
                             if (IsGamepadButtonPressed(q,action->key & 0xffff))
                             {
-                                printf("GID %d,%x PRESSED?\n",gid,action->key&0xffff);
                                 takeAction = true;
                             }
                         }
@@ -123,7 +122,6 @@ void CheckKeys(_input_action_t_ *inputs)
                         {
                             if (IsGamepadButtonReleased(q,action->key & 0xffff))
                             {
-                                printf("GID %d,%x RELEASED?\n",gid,action->key&0xffff);
                                 takeAction = true;
                             }
                         }
@@ -131,7 +129,6 @@ void CheckKeys(_input_action_t_ *inputs)
                         {
                             if (IsGamepadButtonDown(q,action->key & 0xffff))        //  check for HELD
                             {
-                                printf("GID %d,%x DOWN?\n",gid,action->key&0xffff);
                                 takeAction = true;
                             }
                         }
@@ -169,20 +166,26 @@ void CheckKeys(_input_action_t_ *inputs)
             //  if we wanted SHIFT + key 
             if ((action->key&KEY_SHIFT)!=0)
             {
-                if ((IsKeyDown(KEY_LEFT_SHIFT)==0) && (IsKeyDown(KEY_RIGHT_SHIFT)==0))  
+                if ((IsKeyDown(KEY_LEFT_SHIFT)==0) && (IsKeyDown(KEY_RIGHT_SHIFT)==0))
+                {
                     takeAction = false;                     //  no shift was pressed so cancel any action
+                }
             }
             //  if we wanted CONTROL + key 
             if ((action->key&KEY_CONTROL)!=0)
             {
                 if ((IsKeyDown(KEY_LEFT_CONTROL)==0) && (IsKeyDown(KEY_RIGHT_CONTROL)==0))
+                {
                     takeAction = false;                     //  no CONTROL was pressed so cancel any action
+                }
             }
             //  if we wanted ALT + key 
             if ((action->key&KEY_ALT)!=0)
             {
                 if ((IsKeyDown(KEY_LEFT_ALT)==0) && (IsKeyDown(KEY_RIGHT_ALT)==0))
+                {
                     takeAction = false;                     //  no ALT was pressed so cancel any action
+                }
             }
         }
         //  ok we can take this action 
@@ -190,7 +193,9 @@ void CheckKeys(_input_action_t_ *inputs)
         if (takeAction==true)
         {
             if (action->action!=NULL)
+            {
                 action->action(NULL);
+            }
         }
     }
 }
