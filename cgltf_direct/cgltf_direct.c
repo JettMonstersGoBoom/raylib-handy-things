@@ -83,10 +83,10 @@ void DrawNode(cgltf_node *node)
 
     DrawAxis();
     DrawCube((Vector3){0,0,0},0.1,0.1,0.1,ORANGE);
+    //  then draw my children
     for (int c=0;c<node->children_count;c++)
-    {
         DrawNode(node->children[c]);
-    }
+    //  all done
     rlPopMatrix();
 }
 
@@ -106,7 +106,7 @@ int main(int argc,char **argv)
     char *fileName = argv[1];   //  just use 1st arg 
     int dataSize = 0;
     unsigned char *fileData = LoadFileData(fileName, &dataSize);
-
+    //  set default options 
     cgltf_options options = { 0 };
     options.file.read = LoadFileGLTFCallback;
     options.file.release = ReleaseFileGLTFCallback;
@@ -138,13 +138,15 @@ int main(int argc,char **argv)
             ClearBackground(DARKGRAY);
 
             BeginMode3D(camera);
-                for (int q=0;q<data->scenes[0].nodes_count;q++)
-                {
-                    DrawNode(data->scenes[0].nodes[q]);
-                }
-                DrawGrid(100,20);
+            //  draw all nodes in the scene
+            for (int q=0;q<data->scenes[0].nodes_count;q++)
+            {
+                DrawNode(data->scenes[0].nodes[q]);
+            }
+            //  show a grid
+            DrawGrid(100,20);
             EndMode3D();
-
+            //  draw the scene again. this time just 2D text
             for (int q=0;q<data->scenes[0].nodes_count;q++)
             {
                 DrawNode2D(data->scenes[0].nodes[q]);
