@@ -52,11 +52,11 @@ void DrawAxis()
     DrawArrow(RED);
     rlPopMatrix();
     rlPushMatrix();
-    rlRotatef(90,0,1,0);
+    rlRotatef(90,0,0,1);
     DrawArrow(GREEN);
     rlPopMatrix();
     rlPushMatrix();
-    rlRotatef(90,0,0,1);
+    rlRotatef(90,0,-1,0);
     DrawArrow(BLUE);
     rlPopMatrix();
     rlSetLineWidth(1);
@@ -72,6 +72,13 @@ void DrawNode2D(cgltf_node *node)
         DrawNode2D(node->children[c]);
     }
 }
+
+void DrawLight(cgltf_light *light)
+{
+    float r = light->range;
+    if (r == 0) r = 1;
+    DrawSphereWires((Vector3){0,0,0},r,7,7,(Color){light->color[0]*255.0f,light->color[1] * 255.0f,light->color[2] * 255.0f,255});
+}
 //  draw something
 void DrawNode(cgltf_node *node)
 {
@@ -82,11 +89,34 @@ void DrawNode(cgltf_node *node)
         rlMultMatrixf(MatrixToFloat(QuaternionToMatrix((Quaternion){node->rotation[0],node->rotation[1],node->rotation[2],node->rotation[3]})));
 
     DrawAxis();
-    DrawCube((Vector3){0,0,0},0.1,0.1,0.1,ORANGE);
-    //  then draw my children
+
+    if (node->has_scale)
+        rlScalef(node->scale[0], node->scale[1], node->scale[2]);
+
+    if (node->mesh)
+    {
+        DrawCube((Vector3) { 0, 0, 0 }, 0.1, 0.1, 0.1, ORANGE);
+    }
+    else if (node->camera)
+    {
+        rlPushMatrix();
+        rlRotatef(45, 0, 0, 1);
+        DrawCylinderWiresEx((Vector3) { 0, 0, 0 },
+            (Vector3) {0, 0, -1}, .1, 1, 4, WHITE);
+        rlPopMatrix();
+    }
+    else if (node->light)
+    {
+        DrawLight(node->light);
+    }
+    else
+    {
+        DrawCubeWires((Vector3) { 0, 0, 0 }, 1, 1, 1, RED);
+    }
     for (int c=0;c<node->children_count;c++)
+    {
         DrawNode(node->children[c]);
-    //  all done
+    }
     rlPopMatrix();
 }
 
@@ -106,7 +136,7 @@ int main(int argc,char **argv)
     char *fileName = argv[1];   //  just use 1st arg 
     int dataSize = 0;
     unsigned char *fileData = LoadFileData(fileName, &dataSize);
-    //  set default options 
+
     cgltf_options options = { 0 };
     options.file.read = LoadFileGLTFCallback;
     options.file.release = ReleaseFileGLTFCallback;
@@ -138,15 +168,13 @@ int main(int argc,char **argv)
             ClearBackground(DARKGRAY);
 
             BeginMode3D(camera);
-            //  draw all nodes in the scene
-            for (int q=0;q<data->scenes[0].nodes_count;q++)
-            {
-                DrawNode(data->scenes[0].nodes[q]);
-            }
-            //  show a grid
-            DrawGrid(100,20);
+                for (int q=0;q<data->scenes[0].nodes_count;q++)
+                {
+                    DrawNode(data->scenes[0].nodes[q]);
+                }
+                DrawGrid(100,20);
             EndMode3D();
-            //  draw the scene again. this time just 2D text
+
             for (int q=0;q<data->scenes[0].nodes_count;q++)
             {
                 DrawNode2D(data->scenes[0].nodes[q]);
