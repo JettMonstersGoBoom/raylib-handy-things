@@ -38,3 +38,7 @@ an addon for Godot to export a simple ascii scene representation. DO NOT USE AS 
 # CGLTF direct access test
 showing how to get data using the built in implementation of cgltf
 ![](https://github.com/JettMonstersGoBoom/raylib-handy-things/blob/main/cgltf_direct/screenshot.png)
+
+# Zipfiles 
+overload loading binary data with utility functions to load files from zip instead 
+
