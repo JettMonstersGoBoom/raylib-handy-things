@@ -35,3 +35,6 @@ only tested on windows , but should work for others.
 # Godot-Simple_Export 
 an addon for Godot to export a simple ascii scene representation. DO NOT USE AS IS. it's for learning from. 
 
+# CGLTF direct access test
+showing how to get data using the built in implementation of cgltf
+![](https://github.com/JettMonstersGoBoom/raylib-handy-things/blob/main/cgltf_direct/screenshot.png)
