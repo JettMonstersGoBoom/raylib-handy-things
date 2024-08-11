@@ -1,3 +1,7 @@
+// NOTE NOTE 
+// I think the rotation may be incorrect. the only A-B testing I've done is with the Camera object
+// END NOTE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
