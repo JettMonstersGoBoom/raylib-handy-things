@@ -62,6 +62,7 @@ void DrawAxis()
     rlSetLineWidth(1);
 }
 //  draw the name on screen 
+// NOTE will draw even behind the camera. which isn't correct :P 
 void DrawNode2D(cgltf_node *node)
 {
     Vector2 spos = GetWorldToScreen((Vector3){node->translation[0],node->translation[1],node->translation[2]},camera);
