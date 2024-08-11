@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "raylib.h"
 
@@ -52,11 +53,12 @@ bool Action_C(void *idk)
 #define GAMEPAD1            0b01000000000000000000000000000000
 #define GAMEPAD2            0b01100000000000000000000000000000
 #define GAMEPAD3            0b10000000000000000000000000000000
-#define GAMEPAD_ANY         0b11100000000000000000000000000000  //  any of the 4 gamepads 
-
+//  any of the 4 gamepads 
+#define GAMEPAD_ANY         0b11100000000000000000000000000000  
 //  bitmasks for gamepad states  
 #define GAMEPAD_PRESSED     0b00010000000000000000000000000000
 #define GAMEPAD_RELEASED    0b00001000000000000000000000000000
+
 //  bitmasks for keyboard states
 #define KEY_PRESSED         0b00010000000000000000000000000000
 #define KEY_RELEASED        0b00001000000000000000000000000000
@@ -76,9 +78,10 @@ _input_action_t_ input_actions[]=
     //  pressed A
     { KEY_A | KEY_PRESSED , Action_A_pressed},
     //  B handler
+    //  NOTE the order is important. we want PRESSED before just held
     { KEY_B | KEY_PRESSED , Action_B_pressed},
-    { KEY_B | KEY_RELEASED , Action_B_released},
     { KEY_B , Action_B },
+    { KEY_B | KEY_RELEASED , Action_B_released},
     //  check gamepad 0 
     //  OR gamepad ANY 
     { GAMEPAD0      | GAMEPAD_BUTTON_LEFT_FACE_UP | GAMEPAD_PRESSED         , Action_A_pressed},
