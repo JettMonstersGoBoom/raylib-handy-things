@@ -1,7 +1,3 @@
-// NOTE NOTE 
-// I think the rotation may be incorrect. the only A-B testing I've done is with the Camera object
-// END NOTE
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,34 +40,37 @@ static void ReleaseFileGLTFCallback(const struct cgltf_memory_options *memoryOpt
 //  draw an arrow
 void DrawArrow(Color color)
 {
-    DrawLine3D((Vector3){0,0,0},(Vector3){0.5,0,0},  color);
+//    DrawLine3D((Vector3){0,0,0},(Vector3){0.5,0,0},  color);
+    DrawCylinderEx((Vector3) { 0, 0, 0 },
+        (Vector3) {
+        0.5, 0, 0
+    }, .025, 0.025, 3, color);
+
     DrawCylinderEx((Vector3){0.5,0,0},
-                   (Vector3){0.7,0,0}, .1, 0, 12, color);
+                   (Vector3){0.7,0,0}, .1, 0, 4, color);
 }
 //  draw 3d axis
 void DrawAxis()
 {   
-    rlSetLineWidth(2);
     rlPushMatrix();
     DrawArrow(RED);
     rlPopMatrix();
     rlPushMatrix();
     rlRotatef(90,0,0,1);
-    DrawArrow(GREEN);
-    rlPopMatrix();
-    rlPushMatrix();
-    rlRotatef(90,0,-1,0);
     DrawArrow(BLUE);
     rlPopMatrix();
-    rlSetLineWidth(1);
+    rlPushMatrix();
+    rlRotatef(90,0,1,0);
+    DrawArrow(GREEN);
+    rlPopMatrix();
 }
 //  draw the name on screen 
-// NOTE will draw even behind the camera. which isn't correct :P 
 void DrawNode2D(cgltf_node *node)
 {
     Vector2 spos = GetWorldToScreen((Vector3){node->translation[0],node->translation[1],node->translation[2]},camera);
     int w = GetTextWidth(node->name);
-    DrawText(TextFormat("%s",node->name),(int)spos.x-(w/2),(int)spos.y-16,16,WHITE);
+    if ((node->camera) || (node->mesh) || (node->light))
+        DrawText(TextFormat("%s",node->name),(int)spos.x-(w/2),(int)spos.y-32,16,WHITE);
     for (int c=0;c<node->children_count;c++)
     {
         DrawNode2D(node->children[c]);
@@ -92,9 +91,7 @@ void DrawNode(cgltf_node *node)
         rlTranslatef(node->translation[0],node->translation[1],node->translation[2]);
     if (node->has_rotation)
         rlMultMatrixf(MatrixToFloat(QuaternionToMatrix((Quaternion){node->rotation[0],node->rotation[1],node->rotation[2],node->rotation[3]})));
-
     DrawAxis();
-
     if (node->has_scale)
         rlScalef(node->scale[0], node->scale[1], node->scale[2]);
 
