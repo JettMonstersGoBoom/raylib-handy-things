@@ -1,3 +1,7 @@
+// NOTE NOTE 
+// I think the rotation may be incorrect. the only A-B testing I've done is with the Camera object
+// END NOTE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,14 +44,10 @@ static void ReleaseFileGLTFCallback(const struct cgltf_memory_options *memoryOpt
 //  draw an arrow
 void DrawArrow(Color color)
 {
-//    DrawLine3D((Vector3){0,0,0},(Vector3){0.5,0,0},  color);
     DrawCylinderEx((Vector3) { 0, 0, 0 },
-        (Vector3) {
-        0.5, 0, 0
-    }, .025, 0.025, 3, color);
-
+        (Vector3) {0.5, 0, 0}, .025, 0.025, 3, color);
     DrawCylinderEx((Vector3){0.5,0,0},
-                   (Vector3){0.7,0,0}, .1, 0, 4, color);
+                   (Vector3){0.7,0,0}, .1, 0, 12, color);
 }
 //  draw 3d axis
 void DrawAxis()
@@ -55,26 +55,89 @@ void DrawAxis()
     rlPushMatrix();
     DrawArrow(RED);
     rlPopMatrix();
+
     rlPushMatrix();
-    rlRotatef(90,0,0,1);
+    rlRotatef(90, 0, 0, 1);
     DrawArrow(BLUE);
     rlPopMatrix();
+
     rlPushMatrix();
     rlRotatef(90,0,1,0);
     DrawArrow(GREEN);
     rlPopMatrix();
+    rlSetLineWidth(1);
 }
-//  draw the name on screen 
-void DrawNode2D(cgltf_node *node)
+
+
+// Get size position for a 3d world space position (useful for texture drawing)
+Vector2 GetWorldToScreenExClip(Vector3 position, Camera camera, int width, int height)
 {
-    Vector2 spos = GetWorldToScreen((Vector3){node->translation[0],node->translation[1],node->translation[2]},camera);
-    int w = GetTextWidth(node->name);
-    if ((node->camera) || (node->mesh) || (node->light))
-        DrawText(TextFormat("%s",node->name),(int)spos.x-(w/2),(int)spos.y-32,16,WHITE);
+    // Calculate projection matrix (from perspective instead of frustum
+    Matrix matProj = MatrixIdentity();
+
+    if (camera.projection == CAMERA_PERSPECTIVE)
+    {
+        // Calculate projection matrix from perspective
+        matProj = MatrixPerspective(camera.fovy*DEG2RAD, ((double)width/(double)height), rlGetCullDistanceNear(), rlGetCullDistanceFar());
+    }
+    else if (camera.projection == CAMERA_ORTHOGRAPHIC)
+    {
+        double aspect = (double)width/(double)height;
+        double top = camera.fovy/2.0;
+        double right = top*aspect;
+
+        // Calculate projection matrix from orthographic
+        matProj = MatrixOrtho(-right, right, -top, top, rlGetCullDistanceNear(), rlGetCullDistanceFar());
+    }
+
+    // Calculate view matrix from camera look at (and transpose it)
+    Matrix matView = MatrixLookAt(camera.position, camera.target, camera.up);
+    // Convert world position vector to quaternion
+    Quaternion worldPos = { position.x, position.y, position.z, 1.0f };
+
+    // Transform world position to view
+    worldPos = QuaternionTransform(worldPos, matView);
+
+    // Transform result to projection (clip space position)
+    worldPos = QuaternionTransform(worldPos, matProj);
+
+    // Calculate normalized device coordinates (inverted y)
+    Vector3 ndcPos = { worldPos.x/worldPos.w, -worldPos.y/worldPos.w, worldPos.z/worldPos.w };
+
+    // Calculate 2d screen position vector
+    Vector2 screenPosition = { (ndcPos.x + 1.0f)/2.0f*(float)width, (ndcPos.y + 1.0f)/2.0f*(float)height };
+    if (worldPos.z<0)
+    {
+        screenPosition.x = -1;
+        screenPosition.y = -1;
+    }
+    return screenPosition;
+}
+
+//  draw the name on screen 
+// NOTE will draw even behind the camera. which isn't correct :P 
+void DrawNode2D(cgltf_node *node,Vector2 *screenpos)
+{
+    const char* upper = TextToUpper(node->name);
+//    if ((node->camera) || (node->mesh) || (node->light))
+    {
+        Vector2 spos = GetWorldToScreenExClip((Vector3){node->translation[0],node->translation[1],node->translation[2]},camera,GetScreenWidth(),GetScreenHeight());
+        if ((spos.x!=-1) && (spos.y!=-1))
+        {
+            int w = GetTextWidth(upper);
+            DrawText(TextFormat("%s", upper),(int)spos.x-(w/2),(int)spos.y-16,16,WHITE);
+        }
+        DrawText(TextFormat("%s", upper), (int)screenpos->x, (int)screenpos->y, 16, WHITE);
+        screenpos->y += 14;
+    }
+    screenpos->x += 16;
+
     for (int c=0;c<node->children_count;c++)
     {
-        DrawNode2D(node->children[c]);
+        DrawNode2D(node->children[c],screenpos);
     }
+    screenpos->x -= 16;
+
 }
 
 void DrawLight(cgltf_light *light)
@@ -83,6 +146,12 @@ void DrawLight(cgltf_light *light)
     if (r == 0) r = 1;
     DrawSphereWires((Vector3){0,0,0},r,7,7,(Color){light->color[0]*255.0f,light->color[1] * 255.0f,light->color[2] * 255.0f,255});
 }
+
+void DrawCGLTFMesh(cgltf_mesh* mesh)
+{
+    DrawCube((Vector3) { 0, 0, 0 }, 1, 1, 1, ORANGE);
+}
+
 //  draw something
 void DrawNode(cgltf_node *node)
 {
@@ -91,13 +160,16 @@ void DrawNode(cgltf_node *node)
         rlTranslatef(node->translation[0],node->translation[1],node->translation[2]);
     if (node->has_rotation)
         rlMultMatrixf(MatrixToFloat(QuaternionToMatrix((Quaternion){node->rotation[0],node->rotation[1],node->rotation[2],node->rotation[3]})));
+
+    //  we don't want to scale the axis 
     DrawAxis();
+
     if (node->has_scale)
         rlScalef(node->scale[0], node->scale[1], node->scale[2]);
 
     if (node->mesh)
     {
-        DrawCube((Vector3) { 0, 0, 0 }, 0.1, 0.1, 0.1, ORANGE);
+        DrawCGLTFMesh(node->mesh);
     }
     else if (node->camera)
     {
@@ -147,11 +219,8 @@ int main(int argc,char **argv)
 
     if (result == cgltf_result_success)
     {
-        if (data->file_type == cgltf_file_type_glb) TraceLog(LOG_INFO, "MODEL: [%s] Model basic data (glb) loaded successfully", fileName);
-        else if (data->file_type == cgltf_file_type_gltf) TraceLog(LOG_INFO, "MODEL: [%s] Model basic data (glTF) loaded successfully", fileName);
-        else TraceLog(LOG_WARNING, "MODEL: [%s] Model format not recognized", fileName);
         result = cgltf_load_buffers(&options, data, fileName);
-        if (result != cgltf_result_success) TraceLog(LOG_INFO, "MODEL: [%s] Failed to load mesh/material buffers", fileName);
+        if (result != cgltf_result_success) TraceLog(LOG_INFO, "MODEL: [%s] Failed to load gltf", fileName);
     }
 
     while (!WindowShouldClose())    // Detect window close button or ESC key
@@ -170,17 +239,19 @@ int main(int argc,char **argv)
             ClearBackground(DARKGRAY);
 
             BeginMode3D(camera);
+
                 for (int q=0;q<data->scenes[0].nodes_count;q++)
-                {
                     DrawNode(data->scenes[0].nodes[q]);
-                }
+
                 DrawGrid(100,20);
             EndMode3D();
 
+            Vector2 spos;
+            spos.x = 10;
+            spos.y = 10;
+
             for (int q=0;q<data->scenes[0].nodes_count;q++)
-            {
-                DrawNode2D(data->scenes[0].nodes[q]);
-            }
+                DrawNode2D(data->scenes[0].nodes[q],&spos);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
