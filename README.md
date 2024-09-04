@@ -42,3 +42,6 @@ showing how to get data using the built in implementation of cgltf
 # Zipfiles 
 overload loading binary data with utility functions to load files from zip instead 
 
+# TUI
+simple example using a single draw call with a shader for debug text.
+![](https://github.com/JettMonstersGoBoom/raylib-handy-things/blob/main/tui_text/demo.gif)
