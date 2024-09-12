@@ -90,6 +90,7 @@ void main(int argc,char **argv)
     //    EDIT THIS
     ZFS_MountArchives("archives path",".zip");
 
+    Texture2D texture = LoadTexture("file inside zip");
     InitWindow(1280, 720, "ted");
 
     //  LoadModel, LoadTexture, LoadImage will now all load from the archives 
@@ -111,10 +112,11 @@ void main(int argc,char **argv)
         BeginMode3D(camera);        
         DrawGrid(20,20);
         EndMode3D();
-//        DrawTexture(test,0,0,WHITE);
+        DrawTexture(texture,0,0,WHITE);
         DrawFPS(10,10);
         EndDrawing();
     }
+    UnloadTexture(texture);
     ZFS_UnMountArchives();
 }
 #endif
