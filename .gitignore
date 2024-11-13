@@ -4,3 +4,9 @@
 .vscode
 *.dll_tmp
 *.def
+/BSPToModel/.xmake
+/BSPToModel/build
+BSPToModel/resources/lightmap.png
+BSPToModel/resources/pak0.pak
+BSPToModel/f
+BSPToModel/xmake.lua
