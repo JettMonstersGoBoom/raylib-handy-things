@@ -10,10 +10,7 @@
 #define PAK_FS_IMPL
 #include "pakfs.h"
 
-//  we use a single lightmap image
-//  we can tune with these defines
-
-
+//  see header for docs
 #define _Q2_IMPL_
 #include "quake2.h"
 

@@ -1,6 +1,8 @@
 
 #ifdef _Q2_IMPL_
 
+//  hacked together 
+
 //  q2 levels are scaled really big, we can tweak that here 
 #ifndef Q2_VERTEX_SCALE 
     #define Q2_VERTEX_SCALE 0.01f
@@ -25,6 +27,7 @@
     #define LIGHTMAP_FS "shaders/lightmaped.fs"
 #endif 
 
+//  yes this is pants. make something better
 #ifndef SKY_VS
     #define SKY_VS "shaders/sky.vs"
 #endif 
@@ -33,9 +36,11 @@
     #define SKY_FS "shaders/sky.fs"
 #endif 
 
+//  from the raylib examples
 #ifndef WAVE_FS
     #define WAVE_FS "shaders/wave.fs"
 #endif
+
 
 #include <float.h>
 
@@ -346,8 +351,6 @@ Texture2D ret = {0};
     }
     else 
     {
-        //  generate the name of the texture as a texture, so we can see in the application what texture failed
-//        ret = LoadTextureFromImage(ImageText(fileName,24,WHITE));;
         ret = LoadTextureFromImage(GenImageColor(8, 8, RED));
     }
     RL_FREE(data);
