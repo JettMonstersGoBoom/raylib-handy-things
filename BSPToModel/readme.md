@@ -1,5 +1,11 @@
 NOTES and CAVEATS
 
+while it's multiple .h files, you should only #include "quake2.h" internally the other includes are used. 
+
+this is to allow other bsp formats to be added as .h files and share the obviously shared code.
+
+-------------------------------------------------------------------------------------------------------
+
 Fully supports loading maps and textures directly from Quake 2 pak format files. 
 
 Fully supports loading maps and textures directly from disk 
