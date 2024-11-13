@@ -65,8 +65,8 @@ int main(void)
     InitWindow(screenWidth, screenHeight, "raylib [models] example - Everything on GPU skinning");
     ChangeDirectory("resources");
 
-    // Define transforms to be uploaded to GPU for instances
-    transforms = (Matrix *)RL_CALLOC(MAX_INSTANCES, sizeof(Matrix));   // Pre-multiplied transformations passed to rlgl
+    // Define transforms to be used for instances
+    transforms = (Matrix *)RL_CALLOC(MAX_INSTANCES, sizeof(Matrix));  
 
     // Translate and rotate cubes randomly
     for (int i = 0; i < MAX_INSTANCES; i++)
