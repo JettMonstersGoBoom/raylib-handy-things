@@ -41,6 +41,7 @@ static void ReleaseFileGLTFCallback(const struct cgltf_memory_options *memoryOpt
     UnloadFileData(data);
 }
 
+// JUST FOR DISPLAY, ignore
 //  draw an arrow
 void DrawArrow(Color color)
 {
@@ -49,6 +50,8 @@ void DrawArrow(Color color)
     DrawCylinderEx((Vector3){0.5,0,0},
                    (Vector3){0.7,0,0}, .1, 0, 12, color);
 }
+
+// JUST FOR DISPLAY, ignore
 //  draw 3d axis
 void DrawAxis()
 {   
@@ -68,7 +71,7 @@ void DrawAxis()
     rlSetLineWidth(1);
 }
 
-
+// JUST FOR DISPLAY, ignore
 // Get size position for a 3d world space position (useful for texture drawing)
 Vector2 GetWorldToScreenExClip(Vector3 position, Camera camera, int width, int height)
 {
@@ -114,7 +117,8 @@ Vector2 GetWorldToScreenExClip(Vector3 position, Camera camera, int width, int h
     return screenPosition;
 }
 
-//  draw the name on screen 
+// JUST FOR DISPLAY, ignore
+// draw the name on screen 
 // NOTE will draw even behind the camera. which isn't correct :P 
 void DrawNode2D(cgltf_node *node,Vector2 *screenpos)
 {
@@ -137,7 +141,6 @@ void DrawNode2D(cgltf_node *node,Vector2 *screenpos)
         DrawNode2D(node->children[c],screenpos);
     }
     screenpos->x -= 16;
-
 }
 
 void DrawLight(cgltf_light *light)
