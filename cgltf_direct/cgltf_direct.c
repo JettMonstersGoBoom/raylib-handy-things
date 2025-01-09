@@ -69,77 +69,6 @@ void DrawAxis()
 }
 
 
-// Get size position for a 3d world space position (useful for texture drawing)
-Vector2 GetWorldToScreenExClip(Vector3 position, Camera camera, int width, int height)
-{
-    // Calculate projection matrix (from perspective instead of frustum
-    Matrix matProj = MatrixIdentity();
-
-    if (camera.projection == CAMERA_PERSPECTIVE)
-    {
-        // Calculate projection matrix from perspective
-        matProj = MatrixPerspective(camera.fovy*DEG2RAD, ((double)width/(double)height), rlGetCullDistanceNear(), rlGetCullDistanceFar());
-    }
-    else if (camera.projection == CAMERA_ORTHOGRAPHIC)
-    {
-        double aspect = (double)width/(double)height;
-        double top = camera.fovy/2.0;
-        double right = top*aspect;
-
-        // Calculate projection matrix from orthographic
-        matProj = MatrixOrtho(-right, right, -top, top, rlGetCullDistanceNear(), rlGetCullDistanceFar());
-    }
-
-    // Calculate view matrix from camera look at (and transpose it)
-    Matrix matView = MatrixLookAt(camera.position, camera.target, camera.up);
-    // Convert world position vector to quaternion
-    Quaternion worldPos = { position.x, position.y, position.z, 1.0f };
-
-    // Transform world position to view
-    worldPos = QuaternionTransform(worldPos, matView);
-
-    // Transform result to projection (clip space position)
-    worldPos = QuaternionTransform(worldPos, matProj);
-
-    // Calculate normalized device coordinates (inverted y)
-    Vector3 ndcPos = { worldPos.x/worldPos.w, -worldPos.y/worldPos.w, worldPos.z/worldPos.w };
-
-    // Calculate 2d screen position vector
-    Vector2 screenPosition = { (ndcPos.x + 1.0f)/2.0f*(float)width, (ndcPos.y + 1.0f)/2.0f*(float)height };
-    if (worldPos.z<0)
-    {
-        screenPosition.x = -1;
-        screenPosition.y = -1;
-    }
-    return screenPosition;
-}
-
-//  draw the name on screen 
-// NOTE will draw even behind the camera. which isn't correct :P 
-void DrawNode2D(cgltf_node *node,Vector2 *screenpos)
-{
-    const char* upper = TextToUpper(node->name);
-//    if ((node->camera) || (node->mesh) || (node->light))
-    {
-        Vector2 spos = GetWorldToScreenExClip((Vector3){node->translation[0],node->translation[1],node->translation[2]},camera,GetScreenWidth(),GetScreenHeight());
-        if ((spos.x!=-1) && (spos.y!=-1))
-        {
-            int w = GetTextWidth(upper);
-            DrawText(TextFormat("%s", upper),(int)spos.x-(w/2),(int)spos.y-16,16,WHITE);
-        }
-        DrawText(TextFormat("%s", upper), (int)screenpos->x, (int)screenpos->y, 16, WHITE);
-        screenpos->y += 14;
-    }
-    screenpos->x += 16;
-
-    for (int c=0;c<node->children_count;c++)
-    {
-        DrawNode2D(node->children[c],screenpos);
-    }
-    screenpos->x -= 16;
-
-}
-
 void DrawLight(cgltf_light *light)
 {
     float r = light->range;
@@ -194,6 +123,17 @@ void DrawNode(cgltf_node *node)
     rlPopMatrix();
 }
 
+void DrawNode2D(Vector2 *pos,cgltf_node *node)
+{
+    DrawText(node->name,pos->x,pos->y,10,WHITE);
+    pos->x+=16;
+    pos->y+=10;
+    for (int c=0;c<node->children_count;c++)
+    {
+        DrawNode2D(pos,node->children[c]);
+    }
+    pos->x-=16;
+}
 int main(int argc,char **argv)
 {
     const int screenWidth = 800;
@@ -245,14 +185,10 @@ int main(int argc,char **argv)
 
                 DrawGrid(100,20);
             EndMode3D();
+        Vector2 uipos = (Vector2){0,0};
 
-            Vector2 spos;
-            spos.x = 10;
-            spos.y = 10;
-
-            for (int q=0;q<data->scenes[0].nodes_count;q++)
-                DrawNode2D(data->scenes[0].nodes[q],&spos);
-
+        for (int q=0;q<data->scenes[0].nodes_count;q++)
+            DrawNode2D(&uipos,data->scenes[0].nodes[q]);
         EndDrawing();
         //----------------------------------------------------------------------------------
     }
